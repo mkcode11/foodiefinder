@@ -1,0 +1,974 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f5ef" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23214d3a'/%3E%3Cpath d='M32 10 L37.5 26.5 L54 32 L37.5 37.5 L32 54 L26.5 37.5 L10 32 L26.5 26.5 Z' fill='%23e77b45'/%3E%3C/svg%3E"
+    />
+    <title>FoodieFinder : AI Restaurant Recommendation Chatbot</title>
+    <style>
+      :root {
+        --bg: #f7f5ef;
+        --surface: #ffffff;
+        --ink: #202b25;
+        --muted: #6f7972;
+        --line: #e8e8df;
+        --green: #214d3a;
+        --green-dark: #17392a;
+        --orange: #e77b45;
+        --orange-soft: #fff0e6;
+        --bot: #f1f4ee;
+        --shadow: 0 22px 60px rgba(27, 46, 35, 0.1);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          radial-gradient(
+            circle at 8% 5%,
+            rgba(231, 123, 69, 0.1),
+            transparent 26rem
+          ),
+          radial-gradient(
+            circle at 95% 90%,
+            rgba(33, 77, 58, 0.09),
+            transparent 26rem
+          ),
+          var(--bg);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      textarea {
+        font: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .page {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      header {
+        min-height: 86px;
+        padding: 12px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(32, 43, 37, 0.08);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 43px;
+        height: 43px;
+        border-radius: 15px;
+        background: var(--green);
+        color: #fff;
+        font-size: 22px;
+        box-shadow: 0 7px 16px rgba(33, 77, 58, 0.17);
+      }
+      .brand-name {
+        font-weight: 800;
+        font-size: 19px;
+        letter-spacing: -0.5px;
+        max-width: 420px;
+      }
+      .brand-tag {
+        color: var(--muted);
+        font-size: 11px;
+        margin-top: 2px;
+      }
+      .header-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 13px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.7);
+        color: #4f5e53;
+        font-size: 12px;
+        font-weight: 650;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #5ca678;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 0.82fr 1.18fr;
+        gap: 42px;
+        padding: 46px 0 48px;
+        align-items: center;
+      }
+      .intro {
+        padding: 8px 0 18px;
+      }
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--green);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 800;
+        background: #eaf0e9;
+        border-radius: 999px;
+        padding: 9px 12px;
+      }
+      h1 {
+        font-size: clamp(38px, 4.6vw, 63px);
+        line-height: 1.03;
+        letter-spacing: -2.7px;
+        margin: 23px 0 17px;
+        font-weight: 820;
+      }
+      h1 span {
+        color: var(--orange);
+      }
+      .intro-copy {
+        max-width: 410px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.75;
+      }
+      .feature-list {
+        display: grid;
+        gap: 15px;
+        margin-top: 29px;
+      }
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #435047;
+        font-size: 13px;
+      }
+      .feature-icon {
+        display: grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        background: white;
+        border: 1px solid var(--line);
+      }
+      .tiny-note {
+        font-size: 11px;
+        color: #89918b;
+        margin-top: 28px;
+        line-height: 1.5;
+      }
+
+      .chat-card {
+        background: var(--surface);
+        border: 1px solid rgba(32, 43, 37, 0.08);
+        border-radius: 25px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: min(625px, calc(100vh - 48px));
+        max-height: calc(100vh - 48px);
+      }
+      .chat-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 19px 21px;
+        border-bottom: 1px solid var(--line);
+      }
+      .bot-avatar {
+        width: 43px;
+        height: 43px;
+        display: grid;
+        place-items: center;
+        border-radius: 15px;
+        background: var(--orange-soft);
+        font-size: 22px;
+      }
+      .chat-title {
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .chat-subtitle {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .online-label {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10px;
+        color: #478562;
+        font-weight: 750;
+      }
+      .chat-body {
+        flex: 1;
+        padding: 22px 21px 13px;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      .messages {
+        display: flex;
+        flex-direction: column;
+        gap: 17px;
+      }
+      .message-row {
+        display: flex;
+        gap: 9px;
+        align-items: flex-end;
+        animation: appear 0.22s ease-out;
+      }
+      .message-row.user {
+        justify-content: flex-end;
+      }
+      .mini-avatar {
+        flex: 0 0 auto;
+        width: 27px;
+        height: 27px;
+        display: grid;
+        place-items: center;
+        border-radius: 9px;
+        background: var(--orange-soft);
+        font-size: 14px;
+      }
+      .bubble {
+        max-width: min(88%, 420px);
+        padding: 13px 15px;
+        border-radius: 15px 15px 15px 5px;
+        font-size: 13px;
+        line-height: 1.62;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .bot-bubble {
+        background: var(--bot);
+        color: #344139;
+      }
+      .user-bubble {
+        background: var(--green);
+        color: white;
+        border-radius: 15px 15px 5px 15px;
+      }
+      .message-time {
+        color: #9aa19b;
+        font-size: 10px;
+        margin: 5px 2px 0;
+      }
+      .user .message-time {
+        text-align: right;
+      }
+      .suggestion-label {
+        font-size: 10px;
+        color: #909991;
+        margin: 22px 0 9px 36px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 800;
+      }
+      .suggestions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-left: 36px;
+      }
+      .suggestion {
+        border: 1px solid #e7e9e2;
+        background: #fff;
+        border-radius: 999px;
+        padding: 8px 11px;
+        color: #435047;
+        font-size: 11px;
+        transition: 0.18s ease;
+      }
+      .suggestion:hover {
+        border-color: #9fbaa8;
+        background: #f6f9f5;
+        transform: translateY(-1px);
+      }
+      .typing {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        padding: 6px 1px;
+      }
+      .typing span {
+        width: 6px;
+        height: 6px;
+        background: #90a295;
+        border-radius: 50%;
+        animation: bounce 1s infinite ease-in-out;
+      }
+      .typing span:nth-child(2) {
+        animation-delay: 0.12s;
+      }
+      .typing span:nth-child(3) {
+        animation-delay: 0.24s;
+      }
+      .composer-wrap {
+        border-top: 1px solid var(--line);
+        padding: 14px 17px 15px;
+        background: #fff;
+      }
+      .composer {
+        border: 1px solid #e2e6df;
+        border-radius: 17px;
+        padding: 8px 8px 8px 14px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        background: #fcfcfa;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .composer:focus-within {
+        border-color: #8dae98;
+        box-shadow: 0 0 0 3px rgba(72, 128, 91, 0.09);
+      }
+      textarea {
+        flex: 1;
+        border: 0;
+        outline: 0;
+        resize: none;
+        min-height: 28px;
+        max-height: 110px;
+        background: transparent;
+        color: var(--ink);
+        padding: 4px 0;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      textarea::placeholder {
+        color: #9aa29b;
+      }
+      .send-btn {
+        width: 39px;
+        height: 39px;
+        flex: 0 0 auto;
+        border: 0;
+        border-radius: 12px;
+        background: var(--orange);
+        color: white;
+        font-size: 18px;
+        display: grid;
+        place-items: center;
+        transition: 0.2s;
+      }
+      .send-btn:hover {
+        background: #cf6633;
+        transform: translateY(-1px);
+      }
+      .send-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .composer-hint {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: #9aa19b;
+        font-size: 10px;
+        padding: 9px 3px 0;
+      }
+      .new-chat {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #6d8575;
+        font-size: 10px;
+      }
+      .new-chat:hover {
+        color: var(--green);
+        text-decoration: underline;
+      }
+      footer {
+        text-align: center;
+        font-size: 11px;
+        color: #8c948e;
+        padding: 0 0 27px;
+      }
+
+      .expiry-warning {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 0 auto 18px;
+        padding: 11px 15px;
+        border: 1px solid #f0c9a8;
+        border-radius: 12px;
+        background: var(--orange-soft);
+        color: #9a4d1d;
+        font-size: 12px;
+        font-weight: 650;
+        text-align: center;
+      }
+
+      @keyframes appear {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes bounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.55;
+        }
+        30% {
+          transform: translateY(-5px);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 850px) {
+        .page {
+          width: min(650px, calc(100% - 28px));
+        }
+        main {
+          grid-template-columns: 1fr;
+          gap: 27px;
+          padding: 28px 0 35px;
+        }
+        .intro {
+          padding: 0;
+        }
+        h1 {
+          max-width: 560px;
+          font-size: clamp(39px, 9vw, 58px);
+          margin-top: 18px;
+        }
+        .intro-copy {
+          max-width: 540px;
+        }
+        .feature-list {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+          margin-top: 20px;
+        }
+        .feature {
+          align-items: flex-start;
+          font-size: 11px;
+          line-height: 1.45;
+          gap: 7px;
+        }
+        .feature-icon {
+          width: 29px;
+          height: 29px;
+          flex: 0 0 auto;
+          font-size: 13px;
+        }
+        .tiny-note {
+          margin-top: 16px;
+        }
+        .chat-card {
+          min-height: min(590px, calc(100vh - 24px));
+        }
+      }
+      @media (max-width: 480px) {
+        header {
+          min-height: 72px;
+        }
+        .brand-mark {
+          width: 38px;
+          height: 38px;
+        }
+        .brand-name {
+          font-size: 17px;
+        }
+        .header-pill {
+          font-size: 10px;
+          padding: 8px 10px;
+        }
+        .feature-list {
+          grid-template-columns: 1fr;
+          gap: 9px;
+        }
+        .feature {
+          align-items: center;
+        }
+        .tiny-note {
+          display: none;
+        }
+        .chat-card {
+          min-height: min(590px, calc(100vh - 24px));
+          border-radius: 20px;
+        }
+        .chat-head {
+          padding: 16px;
+        }
+        .chat-body {
+          padding: 17px 13px 10px;
+        }
+        .composer-wrap {
+          padding: 12px;
+        }
+        .suggestions,
+        .suggestion-label {
+          margin-left: 0;
+        }
+        .bubble {
+          max-width: 91%;
+          font-size: 12px;
+        }
+        .online-label {
+          font-size: 0;
+        }
+        .online-label .status-dot {
+          width: 8px;
+          height: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="brand" aria-label="FoodieFinder home">
+          <div class="brand-mark">✦</div>
+          <div>
+            <div class="brand-name">FoodieFinder : AI Restaurant Recommendation Chatbot</div>
+          </div>
+        </div>
+        <div class="header-pill">
+          <span class="status-dot"></span> Your food guide
+        </div>
+      </header>
+
+      <main>
+        <section class="intro">
+          <div class="eyebrow">✦ YOUR PERSONAL FOOD GUIDE</div>
+          <h1>Craving something <span>great?</span></h1>
+          <p class="intro-copy">
+            Tell FoodieFinder what you're in the mood for. Get restaurant ideas
+            based on your location, budget, cuisine, and the kind of experience
+            you want.
+          </p>
+          <div class="feature-list">
+            <div class="feature">
+              <span class="feature-icon">🍜</span
+              ><span>Find cuisine you'll love</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">₹</span
+              ><span>Pick a budget that fits</span>
+            </div>
+            <div class="feature">
+              <span class="feature-icon">📍</span
+              ><span>Discover nearby places</span>
+            </div>
+          </div>
+          <p class="tiny-note">
+            Recommendations are provided by your connected chatbot workflow.
+            Always verify current prices, hours, and availability before
+            visiting.
+          </p>
+        </section>
+
+        <section
+          class="chat-card"
+          aria-label="Restaurant recommendation chatbot"
+        >
+          <div class="chat-head">
+            <div class="bot-avatar">🍽️</div>
+            <div>
+              <div class="chat-title">FoodieFinder Assistant</div>
+              <div class="chat-subtitle">Tell me what you're craving today</div>
+            </div>
+            <div class="online-label">
+              <span class="status-dot"></span> READY TO HELP
+            </div>
+          </div>
+
+          <div class="chat-body" id="chatBody" aria-live="polite">
+            <div class="messages" id="messages">
+              <div class="message-row">
+                <div class="mini-avatar">🍽️</div>
+                <div>
+                  <div class="bubble bot-bubble">
+                    Hey there! 👋 I'm your FoodieFinder assistant. Tell me your
+                    city or area, budget, and the type of food you love — I'll
+                    help you find a great place to eat.
+                  </div>
+                  <div class="message-time">FoodieFinder · now</div>
+                </div>
+              </div>
+            </div>
+            <div class="suggestion-label" id="suggestionLabel">Try asking</div>
+            <div class="suggestions" id="suggestions">
+              <button
+                class="suggestion"
+                type="button"
+                data-prompt="Suggest budget-friendly places for dinner in Mumbai under ₹500 per person."
+              >
+                Dinner under ₹500
+              </button>
+              <button
+                class="suggestion"
+                type="button"
+                data-prompt="Recommend good vegetarian restaurants near Mulund, Mumbai."
+              >
+                Vegetarian near Mulund
+              </button>
+              <button
+                class="suggestion"
+                type="button"
+                data-prompt="I want a nice café for a date in Mumbai. Suggest a few options."
+              >
+                Café for a date
+              </button>
+            </div>
+          </div>
+
+          <div class="composer-wrap">
+            <form class="composer" id="chatForm">
+              <textarea
+                id="messageInput"
+                rows="1"
+                placeholder="Ask for a restaurant recommendation..."
+                aria-label="Your message"
+                required
+              ></textarea>
+              <button
+                class="send-btn"
+                id="sendBtn"
+                type="submit"
+                aria-label="Send message"
+                title="Send"
+              >
+                ➤
+              </button>
+            </form>
+            <div class="composer-hint">
+              <span>Enter to send · Shift + Enter for a new line</span
+              ><button class="new-chat" type="button" id="newChatBtn">
+                Start new chat ↺
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+      <div class="expiry-warning" role="alert">
+        ⚠ Warning: This site will only work until November 15, 2026. After
+        that date the chatbot will go offline.
+      </div>
+      <footer>Made for curious appetites · FoodieFinder</footer>
+    </div>
+
+    <script>
+      // =================== CONNECT YOUR n8n WEBHOOK HERE ===================
+      // Replace only the URL below with your n8n Webhook node URL.
+      const N8N_WEBHOOK_URL =
+        "https://foodiefinder.app.n8n.cloud/webhook/chat";
+      // ====================================================================
+
+      const messagesEl = document.getElementById("messages");
+      const chatBody = document.getElementById("chatBody");
+      const chatForm = document.getElementById("chatForm");
+      const messageInput = document.getElementById("messageInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const suggestions = document.getElementById("suggestions");
+      const suggestionLabel = document.getElementById("suggestionLabel");
+      const newChatBtn = document.getElementById("newChatBtn");
+
+      let conversation = [];
+      let isSending = false;
+      const initialSuggestionsHTML = suggestions.innerHTML;
+      const FOLLOW_UP_SUGGESTIONS = [
+        { label: "Who are you?", prompt: "Who are you?" },
+        { label: "Who made you?", prompt: "Who made you?" },
+        {
+          label: "What NLP concepts do you use?",
+          prompt: "What NLP concepts do you use?",
+        },
+      ];
+      let followUpsShown = false;
+
+      function renderFollowUpSuggestions() {
+        suggestions.innerHTML = "";
+        for (const item of FOLLOW_UP_SUGGESTIONS) {
+          const button = document.createElement("button");
+          button.className = "suggestion";
+          button.type = "button";
+          button.dataset.prompt = item.prompt;
+          button.textContent = item.label;
+          suggestions.appendChild(button);
+        }
+      }
+      const sessionId =
+        window.crypto && crypto.randomUUID
+          ? crypto.randomUUID()
+          : "ff-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
+      function currentTime() {
+        return new Intl.DateTimeFormat([], {
+          hour: "numeric",
+          minute: "2-digit",
+        }).format(new Date());
+      }
+
+      function scrollToBottom() {
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }
+
+      function addMessage(role, text) {
+        const row = document.createElement("div");
+        row.className = "message-row" + (role === "user" ? " user" : "");
+
+        if (role !== "user") {
+          const avatar = document.createElement("div");
+          avatar.className = "mini-avatar";
+          avatar.textContent = "🍽️";
+          row.appendChild(avatar);
+        }
+
+        const content = document.createElement("div");
+        const bubble = document.createElement("div");
+        bubble.className =
+          "bubble " + (role === "user" ? "user-bubble" : "bot-bubble");
+        // Use textContent so a response from the webhook cannot inject HTML into the page.
+        bubble.textContent = text;
+        const time = document.createElement("div");
+        time.className = "message-time";
+        time.textContent =
+          (role === "user" ? "You" : "FoodieFinder") + " · " + currentTime();
+        content.appendChild(bubble);
+        content.appendChild(time);
+        row.appendChild(content);
+        messagesEl.appendChild(row);
+        scrollToBottom();
+        return row;
+      }
+
+      function showTyping() {
+        const row = document.createElement("div");
+        row.className = "message-row";
+        row.id = "typingIndicator";
+        const avatar = document.createElement("div");
+        avatar.className = "mini-avatar";
+        avatar.textContent = "🍽️";
+        const bubble = document.createElement("div");
+        bubble.className = "bubble bot-bubble";
+        bubble.innerHTML =
+          '<div class="typing" aria-label="FoodieFinder is thinking"><span></span><span></span><span></span></div>';
+        row.append(avatar, bubble);
+        messagesEl.appendChild(row);
+        scrollToBottom();
+      }
+
+      function hideTyping() {
+        document.getElementById("typingIndicator")?.remove();
+      }
+
+      function findReply(value, depth = 0) {
+        if (depth > 5 || value == null) return "";
+        if (typeof value === "string") return value.trim();
+        if (Array.isArray(value)) {
+          for (const item of value) {
+            const reply = findReply(item, depth + 1);
+            if (reply) return reply;
+          }
+          return "";
+        }
+        if (typeof value === "object") {
+          // Common n8n AI Agent / LLM response keys, checked in priority order.
+          for (const key of [
+            "reply",
+            "output",
+            "response",
+            "answer",
+            "text",
+            "message",
+            "result",
+            "data",
+            "body",
+          ]) {
+            if (value[key] !== undefined && value[key] !== value) {
+              const reply = findReply(value[key], depth + 1);
+              if (reply) return reply;
+            }
+          }
+        }
+        return "";
+      }
+
+      async function getBotReply(userMessage) {
+        if (
+          !N8N_WEBHOOK_URL ||
+          N8N_WEBHOOK_URL === "PASTE_YOUR_N8N_WEBHOOK_URL_HERE"
+        ) {
+          throw new Error(
+            "Add your n8n Webhook URL in the N8N_WEBHOOK_URL line near the bottom of this HTML file, then try again.",
+          );
+        }
+
+        const payload = {
+          message: userMessage,
+          sessionId: sessionId,
+          history: conversation.slice(-12),
+          source: "foodiefinder-website",
+        };
+
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json, text/plain, */*",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const rawText = await response.text();
+        let result = rawText;
+        if (rawText) {
+          try {
+            result = JSON.parse(rawText);
+          } catch (_) {
+            /* The webhook may return plain text. */
+          }
+        }
+
+        if (!response.ok) {
+          const detail =
+            findReply(result) || rawText || "HTTP " + response.status;
+          throw new Error("n8n returned an error: " + detail);
+        }
+
+        const reply = findReply(result);
+        if (!reply) {
+          throw new Error(
+            'The webhook responded, but I couldn\'t find a reply in its response. Return a JSON field such as { "reply": "Here are three restaurants..." } or { "output": "..." }.',
+          );
+        }
+        return reply;
+      }
+
+      async function sendMessage(text) {
+        const userMessage = text.trim();
+        if (!userMessage || isSending) return;
+
+        isSending = true;
+        sendBtn.disabled = true;
+        messageInput.disabled = true;
+        suggestions.hidden = true;
+        suggestionLabel.hidden = true;
+        addMessage("user", userMessage);
+        conversation.push({ role: "user", content: userMessage });
+        messageInput.value = "";
+        messageInput.style.height = "auto";
+        showTyping();
+
+        try {
+          const reply = await getBotReply(userMessage);
+          hideTyping();
+          addMessage("assistant", reply);
+          conversation.push({ role: "assistant", content: reply });
+        } catch (error) {
+          hideTyping();
+          const friendlyError =
+            error instanceof TypeError
+              ? "I couldn't connect to the n8n webhook. Check that the URL is correct, the workflow is active, and the webhook allows requests from this website (CORS). Details: " +
+                error.message
+              : error.message;
+          addMessage(
+            "assistant",
+            "Sorry, I couldn't get a recommendation just now.\n\n" +
+              friendlyError,
+          );
+          console.error("FoodieFinder webhook error:", error);
+        } finally {
+          isSending = false;
+          sendBtn.disabled = false;
+          messageInput.disabled = false;
+          if (!followUpsShown) {
+            followUpsShown = true;
+            renderFollowUpSuggestions();
+          }
+          suggestions.hidden = false;
+          suggestionLabel.hidden = false;
+          messageInput.focus();
+          scrollToBottom();
+        }
+      }
+
+      chatForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        sendMessage(messageInput.value);
+      });
+
+      messageInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          chatForm.requestSubmit();
+        }
+      });
+
+      messageInput.addEventListener("input", () => {
+        messageInput.style.height = "auto";
+        messageInput.style.height =
+          Math.min(messageInput.scrollHeight, 110) + "px";
+      });
+
+      suggestions.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-prompt]");
+        if (button) sendMessage(button.dataset.prompt);
+      });
+
+      newChatBtn.addEventListener("click", () => {
+        if (isSending) return;
+        conversation = [];
+        messagesEl.innerHTML = "";
+        followUpsShown = false;
+        suggestions.innerHTML = initialSuggestionsHTML;
+        suggestions.hidden = false;
+        suggestionLabel.hidden = false;
+        addMessage(
+          "assistant",
+          "Welcome back! What kind of food or restaurant are you looking for today?",
+        );
+        messageInput.value = "";
+        messageInput.focus();
+      });
+    </script>
+  </body>
+</html>
