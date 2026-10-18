@@ -4,4 +4,4 @@ PPT Link : https://docs.google.com/presentation/d/1ipKrHmm8aQeYYbOoiCvjGk28f8PJL
 Report Link : https://docs.google.com/document/d/1sFYUdwynATrnIZE3B_UHUOygjZ8OomsIuyqvrUCu9wM/edit?usp=sharing
 # Mini-project for ML and NLP
 
-(LICENSE)
+[GNU General Public License v3.0](LICENSE).
